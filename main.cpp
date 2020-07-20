@@ -17,6 +17,7 @@ struct vehiculo{
 	int year;
 	char color[10];
 	struct infraccion *misInfracciones;
+	struct vehiculo *sigVehiculo;
 };
 
 struct personas{
@@ -40,6 +41,21 @@ int comprobarSiExisteFichero(){
 	return 0;
 }
 
+
+void mostrarVehiculos(struct vehiculo *v){
+	vehiculo *veh = v;
+	while(veh){
+		printf("----------------------------------------\n");
+		printf("Placa del Vehiculo: %s\n", veh->placa);
+		printf("Marca del Vehiculo: %s\n", veh->marca);
+		printf("Modelo del Vehiculo: %s\n", veh->modelo);
+		printf("Año del Vehiculo: %i\n", veh->year);
+		printf("Placa del Vehiculo: %s\n", veh->color);	
+		printf("----------------------------------------");
+		veh = veh->sigVehiculo;
+	}
+}
+
 void mostrarInfo(struct personas p){//Mostramos la informacion del usuario
 	printf("----------------------------\n");
 	printf("Nombre: %s\n", p.nombre);
@@ -47,8 +63,28 @@ void mostrarInfo(struct personas p){//Mostramos la informacion del usuario
 	printf("Direccion: %s\n", p.direccion);
 	printf("Fecha De Nacimiento: %i\n", p.fechaDeNacimiento);
 	printf("Sexo: %c\n", p.sexo);
+	if(p.misVehiculos == NULL){
+		printf("Esta persona no posee vehiculos registrados\n");
+	}else{
+		mostrarVehiculos(p.misVehiculos);
+	}
 	printf("----------------------------\n");
 }
+
+void mostrarUsers(){//funcion para mostrar todos los usuarios que tengo almacenado en el registro
+	FILE *pFile;
+	personas p;
+	if((pFile = fopen("Registro.txt", "r"))==NULL){//Compruebo si hay un archivo llamado registro, si no lo esta entonces muestra mensae de error
+		printf("No existe ningun Fichero creado");
+		system("pause");
+	}else{
+		fread(&p, sizeof(p), 1, pFile);//Busco la direccion de memoria de la lista que se encuentra en el registro
+		while(!feof(pFile)){//mientras no sea fin de archivo no dejes de ejecutar el bucle
+			mostrarInfo(p);//Llamo a la funcion, mostrar Info
+			fread(&p, sizeof(p), 1, pFile);//lee lo que se encuentra en la direccion de memoria del fichero
+		}
+	}
+	fclose(pFile);}
 
 void aggUser(){//Funcion para agg a un usuario al registro si esta ya esta creado, si no lo esta, entonces crea el registro y agg al usuario
 	FILE *pFile;
@@ -66,6 +102,7 @@ void aggUser(){//Funcion para agg a un usuario al registro si esta ya esta cread
 		scanf("%i", &p.fechaDeNacimiento); fflush(stdin);
 		printf("Ingrese el sexo de %s (M/F)\n", p.nombre);
 		scanf("%i", &p.sexo); fflush(stdin);
+		p.misVehiculos = NULL;
 		fwrite(&p,sizeof(p),1,pFile);//escribe en la direccion de la lista los datos insertados y lo guarda en el registro
 		fclose(pFile);//cierro el registro para no ocasionar errores
 	}else{
@@ -81,25 +118,10 @@ void aggUser(){//Funcion para agg a un usuario al registro si esta ya esta cread
 		scanf("%i", &p.fechaDeNacimiento); fflush(stdin);
 		printf("Ingrese el sexo de %s (M/F)\n", p.nombre);
 		scanf("%c", &p.sexo); fflush(stdin);
+		p.misVehiculos = NULL;
 		fwrite(&p,sizeof(p),1,pFile);//escribe en la direccion de la lista los datos insertados y lo guarda en el registro
 		fclose(pFile);//cierro el registro para no ocasionar errores
 	}
-}
-
-void mostrarUsers(){//funcion para mostrar todos los usuarios que tengo almacenado en el registro
-	FILE *pFile;
-	personas p;
-	if((pFile = fopen("Registro.txt", "r"))==NULL){//Compruebo si hay un archivo llamado registro, si no lo esta entonces muestra mensae de error
-		printf("No existe ningun Fichero creado");
-		system("pause");
-	}else{
-		fread(&p, sizeof(p), 1, pFile);//Busco la direccion de memoria de la lista que se encuentra en el registro
-		while(!feof(pFile)){//mientras no sea fin de archivo no dejes de ejecutar el bucle
-			mostrarInfo(p);//Llamo a la funcion, mostrar Info
-			fread(&p, sizeof(p), 1, pFile);//lee lo que se encuentra en la direccion de memoria del fichero
-		}
-	}
-	fclose(pFile);//cierro el archivo
 }
 
 void buscarUser(){
@@ -125,6 +147,72 @@ void buscarUser(){
 	system("pause");
 }
 
+struct vehiculo *agregarUnVehiculo(struct personas *p){
+	struct vehiculo *v = NULL;
+	printf("Marca\n");
+	gets(v->marca); fflush(stdin);
+	printf("Modelo\n");
+	gets(v->modelo); fflush(stdin);
+	printf("Placa\n");
+	gets(v->placa); fflush(stdin);
+	v->sigVehiculo = NULL;
+	p->misVehiculos = v;
+}
+
+void registrarVehiculo(){
+	FILE *pFile;
+	FILE *pFileCopy;
+	personas p;
+	int encontrado = 0;
+	int x;
+	printf("Coloca el nro de Cedula de la persona que deseas buscar\n");
+	scanf("%i",&x);
+	pFile = fopen("Registro.txt", "r");
+	pFileCopy = fopen("Temp.txt", "w");
+	if(pFile==NULL){
+		printf("Error");
+		system("pause");
+		return;
+	}else{
+		fread(&p,sizeof(p),1,pFile);
+		while(!feof(pFile)){
+			if(p.cedula == x){
+				encontrado = 1;
+				vehiculo *v = new vehiculo;
+				fflush(stdin);
+				printf("Ingrese la placa del vehiculo (Maximo 8 caracteres)\n");
+				gets(v->placa);fflush(stdin);
+				printf("Ingrese la marca del vehiculo\n");
+				gets(v->marca);fflush(stdin);
+				printf("Ingrese el modelo del vehiculo\n");
+				gets(v->modelo);fflush(stdin);
+				printf("Ingrese el año del vehiculo\n");
+				scanf("%i", &v->year); fflush(stdin);
+				printf("Ingrese el Color del vehiculo\n");
+				gets(v->color);fflush(stdin);
+				v->sigVehiculo = NULL;
+				if(p.misVehiculos == NULL){
+					p.misVehiculos = v;
+				}else{
+					p.misVehiculos->sigVehiculo = p.misVehiculos;
+					p.misVehiculos = v;
+				}
+				fflush(stdin);
+				fwrite(&p, sizeof(p), 1, pFileCopy);
+			}else{
+				fwrite(&p,sizeof(p),1,pFileCopy);
+			}
+			fread(&p,sizeof(p),1,pFile);
+		}
+	}
+	fclose(pFile);
+	fclose(pFileCopy);
+	remove("Registro.txt");
+	rename("Temp.txt", "Registro.txt");
+	system("pause");
+}
+
+
 void editarUser(){
 	FILE *pFile;
 	FILE *pFileCopy;
@@ -146,7 +234,7 @@ void editarUser(){
 			fflush(stdin);
 			printf("Ingrese el Nombre del usuario\n");
 			gets(p.nombre);fflush(stdin);
-			p.cedula = x;
+			//p.cedula = x;
 			printf("Ingrese la direccion donde reside %s\n", p.nombre);
 			gets(p.direccion); fflush(stdin);
 			printf("Ingrese la fecha de nacimiento de %s\n", p.nombre);
@@ -156,7 +244,7 @@ void editarUser(){
 			encontrado = 1;
 			fwrite(&p,sizeof(p),1,pFileCopy);//escribe en la direccion de la lista los datos insertados y lo guarda en el registro
 		}else{
-			fwrite(&p, sizeof(p),1,pFileCopy);
+			fwrite(&p, sizeof(p),1,pFileCopy);//si no lo es, escribe los datos que se encuentran en p
 		}
 		fread(&p, sizeof(p),1,pFile);
 	}
@@ -173,7 +261,52 @@ void editarUser(){
 	}
 }
 
+
 /*menu prototipo para el proyecto*/
+
+void vehiculos(){
+	int n;
+	system("cls");
+	printf("\n\t1. Agregar Vehiculo");
+	printf("\n\t2. Buscar Vehiculo");
+	printf("\n\t3. Editar Informacion del Vehiculo");
+	printf("\n\t4. Volver al menu principal");
+	printf("\n\t0. Salir\n");
+	printf("\n\t Ingrese una opcion (0..4):");
+	scanf("%i", &n);
+
+	if((n>=0) && (n<=4)){
+
+	switch (n)
+	{
+	case 1: registrarVehiculo();
+		system("cls");
+		vehiculos();
+		break;
+    
+	case 2: buscarUser();
+		system("cls");
+		personas();
+		break;
+
+	case 3: editarUser();
+		system("cls");
+		personas();
+		break;
+
+	case 4: menu();
+		break;
+
+	case 0: break;
+	}
+  }
+	else {
+		printf("\n\t opcion no valida\n");
+		system("pause");
+		personas();
+	}
+}
+
 void personas(){
 	int n;
 	system("cls");
@@ -233,7 +366,7 @@ void mantenimiento() {
 	case 1: personas();
 		break;
     
-	case 2:
+	case 2: vehiculos();
 		break;
 
 	case 3: menu();
