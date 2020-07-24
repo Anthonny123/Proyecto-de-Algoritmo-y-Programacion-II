@@ -5,7 +5,7 @@
 struct infraccion{
 	int nroInfraccion;
 	int fechaDeInfraccion;
-	char tipoDeInfraccion[20];
+	char tipoDeInfraccion[50];
 	int montoDeLaMulta;
 	int pagado;
 	infraccion *sigInfraccion;
@@ -216,6 +216,7 @@ struct vehiculo *buscarVehiculoPlaca(struct personas *p, char placa[8]){
 		for(;v; v = v->sigVehiculo){
 			if(strcmp(v->placa, placa) == 0){
 				encontrado = 1;
+				printf("El vehiculo pertenece al propietario del numero de cedula %i\n", p->cedula);
 				return v;
 			}
 		}
@@ -292,7 +293,7 @@ int contarVehiculo(struct vehiculo *v){
                           FUNCIONES PARA LAS INFRACCIONES 
 //////////////////////////////////////////////////////////////////////////////////////////*/
 
-void aggInfraccion(struct infraccion **i, int nInfraccion, int fInfraccion, char tInfraccion[20], int mInfraccion, int pagado){
+void aggInfraccion(struct infraccion **i, int nInfraccion, int fInfraccion, char tInfraccion[50], int mInfraccion, int pagado){
 	struct infraccion *tmp = new struct infraccion;
 	tmp->nroInfraccion = nInfraccion;
 	tmp->fechaDeInfraccion = fInfraccion;
@@ -308,7 +309,7 @@ void insertarInfraccion(struct personas **p){
 	char placa[8];
 	int nroInfraccion = 0;
 	int fechaDeInfraccion = 0;
-	char tipoDeInfraccion[20];
+	char tipoDeInfraccion[50];
 	int montoDeLaMulta = 0;
 	int pagado = 0;
 	fflush(stdin);
@@ -329,6 +330,40 @@ void insertarInfraccion(struct personas **p){
 		printf("\n");
 		fflush(stdin);
 		aggInfraccion(&tmp->misInfracciones, nroInfraccion, fechaDeInfraccion, tipoDeInfraccion, montoDeLaMulta, pagado);
+	}
+}
+
+struct infraccion *buscarMultaPorNroDeMulta(struct personas *p, int nroMulta){
+	struct vehiculo *tmpV = NULL;
+	struct infraccion *tmpI = NULL;
+	if(p){
+		for(;p; p=p->sigPersona){
+			tmpV = p->misVehiculos;
+			for(;tmpV; tmpV = tmpV->sigVehiculo){
+				tmpI = tmpV->misInfracciones;
+				for(;tmpI; tmpI = tmpI->sigInfraccion){
+					if(tmpI->nroInfraccion == nroMulta){
+						printf("Esta multa esta asociada al vehiculo de placa: %s", tmpV->placa);
+						printf("\n");
+						return tmpI;
+					}
+				}
+			}
+		}
+	}
+}
+
+void mostrarMultaEncontrada(struct infraccion *i){
+	if(i){
+		printf("Infraccion Nro %i: \n", i->nroInfraccion);
+		printf("Tipo de infraccion: %s\n", i->tipoDeInfraccion);
+		printf("Fecha en la que se ocasiono la infraccion: %i\n", i->fechaDeInfraccion);
+		printf("Monto a pagar: %i\n", i->montoDeLaMulta);
+		if(i->pagado == 0){
+			printf("Esta multa no ha sido pagada\n");
+		}else{
+			printf("Esta multa ya fue pagada\n");
+		}
 	}
 }
 
@@ -399,7 +434,7 @@ void cargarDatos(struct personas **p){
 	char color[10];
 	int nroInfraccion = 0;
 	int fechaDeInfraccion = 0;
-	char tipoDeInfraccion[20];
+	char tipoDeInfraccion[50];
 	int montoDeLaMulta = 0;
 	int pagado = 0;
 	FILE *pFile;
@@ -435,8 +470,8 @@ void cargarDatos(struct personas **p){
 			fgets(string, 100, pFile);
 			sscanf(string, "%i", &year);
 			aggVehiculo(&(*p)->misVehiculos, year, placa, marca, modelo, color);
-			fgets(string, 100, pFile); sscanf(string, "i", &infraccionesRegistradas);
-			/*for(int k = 0; k<infraccionesRegistradas; k++){
+			fgets(string, 100, pFile); sscanf(string, "%i", &infraccionesRegistradas);
+			for(int k = 0; k<infraccionesRegistradas; k++){
 				fgets(string, 100, pFile); 
 				sscanf(string, "%i", &nroInfraccion);
 				fgets(string, 100, pFile); 
@@ -448,7 +483,7 @@ void cargarDatos(struct personas **p){
 				fgets(string, 100, pFile); 
 				sscanf(string, "%i", &pagado);
 				aggInfraccion(&(*p)->misVehiculos->misInfracciones,nroInfraccion, fechaDeInfraccion, tipoDeInfraccion, montoDeLaMulta, pagado);
-			}*/
+			}
 		}
 	}
 	fclose(pFile);
@@ -550,6 +585,7 @@ int main(){
 													gets(placaV);
 													mostrarVehiculoEncontrado(buscarVehiculoPlaca(p, placaV));//Falta hacer la funcion de buscar un vehiculo
 													system("pause");
+													system("cls");
 													break;
 												}
 												case 4: break;//Falta hacer la funcion de eliminar a un vehiculo
@@ -586,9 +622,17 @@ int main(){
 										if(z>=0&&z<=4){
 											switch(z){
 												case 1: insertarInfraccion(&p); 
-												break;//Falta la funcion de agregar multa
+												break;
 												case 2: break;//Falta la funcion de Pagar una multa
-												case 3: break;//Falta la funcion de Consultar la informacion de multas asociada a un vehiculo
+												case 3:{
+													int nroMulta = 0;
+													printf("Inserte el Nro de infraccion que desea buscar: ");
+													scanf("%i", &nroMulta);
+													system("cls");
+													mostrarMultaEncontrada(buscarMultaPorNroDeMulta(p,nroMulta));
+													system("pause");
+													break;
+												} //Falta la funcion de Consultar la informacion de multas asociada a un vehiculo
 												case 4: break;//Falta hacer la funcion de eliminar una multa del sistema
 											}
 										}
