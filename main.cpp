@@ -201,7 +201,7 @@ void aggVehiculo(struct vehiculo **v, int year, char placa[8], char marca[15], c
 	strcpy(tmp->marca, marca);
 	strcpy(tmp->modelo, modelo);
 	strcpy(tmp->color, color);
-	tmp->sigVehiculo = NULL;
+	//tmp->sigVehiculo = NULL;
 	tmp->misInfracciones = NULL;
 	tmp->sigVehiculo = *v;
 	*v = tmp;
@@ -269,6 +269,54 @@ void insertarVehiculo(struct vehiculo **v, struct personas **p){
 	}
 }
 
+void modificarVehiculo(struct vehiculo *v){
+	if(v){
+		fflush(stdin);
+		printf("Ingrese una nueva marca para el vehiculo: "); gets(v->marca);
+		printf("\n");
+		fflush(stdin);
+		printf("Ingrese un nuevo modelo para el vehiculo: "); gets(v->modelo);
+		printf("\n");
+		fflush(stdin);
+		printf("Ingrese un nuevo año para el vehiculo: "); scanf("%i", &v->year);
+		printf("\n");
+		fflush(stdin);
+		printf("Ingrese un nuevo color para el vehiculo: "); gets(v->color);
+		printf("\n");
+	}
+}
+
+void eliminarTodasLasMultasDeUnVehiculos(struct infraccion *i);
+
+void eliminarVehiculosPorNroDePlaca(struct personas **p, char placa[8]){
+	struct vehiculo *tmpV = NULL;
+	struct personas *tmp = *p;
+	if(tmp){
+		for(;tmp; tmp = tmp->sigPersona){
+			tmpV = tmp->misVehiculos;
+			if(tmpV){
+				if(strcmp(tmpV->placa, placa) == 0){
+					eliminarTodasLasMultasDeUnVehiculos(tmpV->misInfracciones);
+					/*vehiculo *aux = NULL;
+					aux = tmpV;
+					tmpV = tmpV->sigVehiculo;
+					delete(aux);*/
+				}else{
+					while((tmpV->sigVehiculo)&&(strcmp(tmpV->sigVehiculo->placa, placa) != 0)){
+						tmpV = tmpV->sigVehiculo;
+					}
+					if(tmpV->sigVehiculo){
+						eliminarTodasLasMultasDeUnVehiculos(tmpV->misInfracciones);
+						/*vehiculo *aux = tmpV->sigVehiculo;
+						tmpV->sigVehiculo = tmpV->sigVehiculo->sigVehiculo;
+						delete(aux);*/	
+					}
+				}
+			}
+		}
+	}
+}
+
 void eliminarVehiculos(struct vehiculo *v){
 	if(v){
 		while(v){
@@ -300,7 +348,7 @@ void aggInfraccion(struct infraccion **i, int nInfraccion, int fInfraccion, char
 	tmp->montoDeLaMulta = mInfraccion;
 	tmp->pagado = pagado;
 	strcpy(tmp->tipoDeInfraccion, tInfraccion);
-	tmp->sigInfraccion = NULL;
+	//tmp->sigInfraccion = NULL;
 	tmp->sigInfraccion = *i;
 	*i = tmp;
 }
@@ -334,6 +382,7 @@ void insertarInfraccion(struct personas **p){
 }
 
 struct infraccion *buscarMultaPorNroDeMulta(struct personas *p, int nroMulta){
+	int encontrada = 0;
 	struct vehiculo *tmpV = NULL;
 	struct infraccion *tmpI = NULL;
 	if(p){
@@ -345,11 +394,16 @@ struct infraccion *buscarMultaPorNroDeMulta(struct personas *p, int nroMulta){
 					if(tmpI->nroInfraccion == nroMulta){
 						printf("Esta multa esta asociada al vehiculo de placa: %s", tmpV->placa);
 						printf("\n");
+						int encontada = 1;
 						return tmpI;
 					}
 				}
 			}
 		}
+	}
+	if(encontrada == 0){
+		printf("Lo sentimos pero no se ha encontrado en nuestros registros\n");
+		system("pause");
 	}
 }
 
@@ -365,6 +419,93 @@ void mostrarMultaEncontrada(struct infraccion *i){
 			printf("Esta multa ya fue pagada\n");
 		}
 	}
+}
+
+/*
+void eliminarMulta(struct infraccion **i, int nroMulta){
+	infraccion *tmp = *i;
+	if(tmp){
+		if(tmp->nroInfraccion == nroMulta){
+			*i = (*i)->sigInfraccion;
+			delete(tmp);
+		}else{
+			while((tmp->sigInfraccion)&&(tmp->sigInfraccion->nroInfraccion!=nroMulta)){
+				tmp = tmp->sigInfraccion;
+			}
+			if(tmp->sigInfraccion){
+				infraccion *aux = tmp->sigInfraccion;
+				tmp->sigInfraccion = tmp->sigInfraccion->sigInfraccion;
+				delete(aux);
+			}
+		}
+	}
+}
+
+void eliminarMultaPorNroInfraccion(struct personas **p, int nroMulta){
+	struct personas *tmp = *p;
+	struct vehiculo *tmpV = NULL;
+	struct infraccion *tmpI = NULL;
+	if(tmp){
+		for(; tmp; tmp = tmp->sigPersona){
+			tmpV = tmp->misVehiculos;
+			if(tmpV){
+				for(;tmpV; tmpV = tmpV->sigVehiculo){
+					tmpI = tmpV->misInfracciones;
+					if(tmpI){
+						if(tmpI->nroInfraccion == nroMulta){
+							eliminarMulta(&tmpI, nroMulta);
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+*/
+
+/*
+void eliminarMultaPorNroDeMulta(struct personas **p, int nroMulta){
+	struct vehiculo *tmpV = NULL;
+	struct infraccion *tmpI = NULL;
+	struct personas *tmp = *p;
+	if(tmp){
+		for(;tmp; tmp = tmp->sigPersona){
+			tmpV = tmp->misVehiculos;
+			for(;tmpV; tmpV = tmpV->sigVehiculo){
+				tmpI = tmpV->misInfracciones;
+				if(tmpI){
+					if(tmpI->nroInfraccion == nroMulta){
+						infraccion *aux = NULL;
+						aux = &(*tmpI);
+						tmpI = tmpI->sigInfraccion;
+						delete(aux);
+					}else{
+						while((tmpI->sigInfraccion)&&(tmpI->sigInfraccion->nroInfraccion!=nroMulta)){
+							tmpI = tmpI->sigInfraccion;
+						}
+						if(tmpI->sigInfraccion){
+							infraccion *aux = new infraccion;
+							aux = tmpI->sigInfraccion;
+							tmpI->sigInfraccion = tmpI->sigInfraccion->sigInfraccion;
+							delete(aux);	
+						}
+					}
+				}
+			}
+		}
+	}
+}*/
+
+void eliminarTodasLasMultasDeUnVehiculos(struct infraccion *i){
+	if(i){
+		while(i){
+			struct infraccion *tmp = new infraccion;
+			tmp = i;
+			i = i->sigInfraccion;
+			delete(tmp);
+		}
+	} 
 }
 
 int contarMultas(struct infraccion *i){
@@ -517,6 +658,9 @@ int main(){
 						scanf("%i", &y);
 						if(y>=0 && y<=2){
 							switch(y){
+/*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                    SECCION PERSONAS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 								case 1:{
 									int z = -1;
 									while(z!=0){
@@ -561,6 +705,9 @@ int main(){
 									}
 									break;
 								}
+/*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                    SECCION VEHICULOS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 								case 2:{
 									int z = -1;
 									while(z!=0){
@@ -575,20 +722,32 @@ int main(){
 											switch(z){
 												case 1: insertarVehiculo(&p->misVehiculos, &p);
 												break;
-												case 2: //Falta la funcion
-												break;
+												case 2: {
+													system("cls");
+													char placaV[8];
+													system("cls");
+													printf("Introduce la placa del vehiculo que desea modificar: ");
+													fflush(stdin);
+													gets(placaV);
+													modificarVehiculo(buscarVehiculoPlaca(p,placaV));
+													system("pause");
+													break;
+												}
 												case 3:{
+													system("cls");
 													char placaV[8];
 													system("cls");
 													printf("Introduce la placa del vehiculo que desea buscar: ");
 													fflush(stdin);
 													gets(placaV);
-													mostrarVehiculoEncontrado(buscarVehiculoPlaca(p, placaV));//Falta hacer la funcion de buscar un vehiculo
+													mostrarVehiculoEncontrado(buscarVehiculoPlaca(p, placaV));
 													system("pause");
-													system("cls");
 													break;
 												}
-												case 4: break;//Falta hacer la funcion de eliminar a un vehiculo
+												case 4:{
+													//eliminarVehiculosPorNroDePlaca(&p, "AAA111");
+													break;
+												}
 											}
 										}
 									}
@@ -609,6 +768,9 @@ int main(){
 						scanf("%i", &y);
 						if(y>=0 && y<=2){
 							switch(y){
+/*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                    SECCION MULTAS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 								case 1:{
 									system("cls");
 									int z = -1;
@@ -626,14 +788,20 @@ int main(){
 												case 2: break;//Falta la funcion de Pagar una multa
 												case 3:{
 													int nroMulta = 0;
-													printf("Inserte el Nro de infraccion que desea buscar: ");
+													printf("Inserte el Nro de infraccion que desea buscar en el sistema: ");
 													scanf("%i", &nroMulta);
 													system("cls");
 													mostrarMultaEncontrada(buscarMultaPorNroDeMulta(p,nroMulta));
 													system("pause");
 													break;
 												} //Falta la funcion de Consultar la informacion de multas asociada a un vehiculo
-												case 4: break;//Falta hacer la funcion de eliminar una multa del sistema
+												case 4:{
+													int nroMulta = 0;
+													printf("Inserte en nro de infraccion que desee eliminar del sistema: ");
+													scanf("%i", &nroMulta);
+													//eliminarMultaPorNroInfraccion(&p, nroMulta);
+													break;
+												} 
 											}
 										}
 									}
