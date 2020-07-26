@@ -107,13 +107,26 @@ void modificarPersona(struct personas *p){
 	printf("Modificacion Exitosa\n");
 }
 
-void eliminarVehiculos(struct vehiculo *v);
+void eliminarVehiculosDelasPersonas(struct personas *p){
+	vehiculo *aux = p->misVehiculos;
+	if(aux){
+		while(p->misVehiculos){
+			aux = p->misVehiculos;
+			p->misVehiculos = p->misVehiculos->sigVehiculo;
+			delete(aux);
+		}
+	} 
+}
+
+
+void eliminarTodasLasMultasDeUnVehiculos(struct vehiculo *v);
 
 void eliminarPersonas(struct personas **p, int cedula){
 	struct personas *tmp = *p;
 	if(tmp){
 		if(tmp->cedula == cedula){
-			eliminarVehiculos((*p)->misVehiculos);
+			eliminarTodasLasMultasDeUnVehiculos((*p)->misVehiculos);
+			eliminarVehiculosDelasPersonas(*p);
 			*p = (*p)->sigPersona;
 			delete(tmp);
 		}else{
@@ -121,14 +134,16 @@ void eliminarPersonas(struct personas **p, int cedula){
 				tmp = tmp->sigPersona;
 			}
 			if(tmp->sigPersona){
-				eliminarVehiculos((*p)->misVehiculos);
 				struct personas *aux = tmp->sigPersona;
+				eliminarVehiculosDelasPersonas(aux);
+				eliminarTodasLasMultasDeUnVehiculos(aux->misVehiculos);
 				tmp->sigPersona = tmp->sigPersona->sigPersona;
 				delete(aux);
 			}
 		}
 	}
 }
+
 
 void mostrarPersonas(struct personas *p){
 	personas *tmp = p;
@@ -230,11 +245,13 @@ struct vehiculo *buscarVehiculoPlaca(struct personas *p, char placa[8]){
 
 void mostrarVehiculoEncontrado(struct vehiculo *v){
 	if(v){
-		printf("Vehiculo: \n");
-		printf("Placa: %s\n", v->placa);
-		printf("Marca: %s\n", v->marca);
-		printf("Modelo: %s\n", v->modelo);
-		printf("Color: %s\n", v->color);	
+		//printf("Vehiculo: \n");
+		printf("----------------------------------");
+		printf("\n\tPlaca: %s", v->placa);
+		printf("\n\tMarca: %s", v->marca);
+		printf("\n\tModelo: %s", v->modelo);
+		printf("\n\tColor: %s\n", v->color);
+		//printf("----------------------------------\n");	
 	}
 }
 
@@ -286,7 +303,16 @@ void modificarVehiculo(struct vehiculo *v){
 	}
 }
 
-void eliminarTodasLasMultasDeUnVehiculos(struct infraccion *i);
+void eliminarTodasLasMultasDeUnVehiculos(struct vehiculo *v){
+	infraccion *aux = v->misInfracciones;
+	if(aux){
+		while(v->misInfracciones){
+			aux = v->misInfracciones;
+			v->misInfracciones = v->misInfracciones->sigInfraccion;
+			delete(aux);
+		}
+	} 
+}
 
 void eliminarVehiculosPorNroDePlaca(struct personas **p, char placa[8]){
 	struct vehiculo *tmpV = NULL;
@@ -296,20 +322,18 @@ void eliminarVehiculosPorNroDePlaca(struct personas **p, char placa[8]){
 			tmpV = tmp->misVehiculos;
 			if(tmpV){
 				if(strcmp(tmpV->placa, placa) == 0){
-					eliminarTodasLasMultasDeUnVehiculos(tmpV->misInfracciones);
-					/*vehiculo *aux = NULL;
-					aux = tmpV;
-					tmpV = tmpV->sigVehiculo;
-					delete(aux);*/
+					eliminarTodasLasMultasDeUnVehiculos(tmpV);
+					tmp->misVehiculos = tmp->misVehiculos->sigVehiculo;
+					delete(tmpV);
 				}else{
-					while((tmpV->sigVehiculo)&&(strcmp(tmpV->sigVehiculo->placa, placa) != 0)){
+					while((tmpV->sigVehiculo!=NULL)&&(strcmp(tmpV->sigVehiculo->placa, placa) != 0)){
 						tmpV = tmpV->sigVehiculo;
 					}
-					if(tmpV->sigVehiculo){
-						eliminarTodasLasMultasDeUnVehiculos(tmpV->misInfracciones);
-						/*vehiculo *aux = tmpV->sigVehiculo;
-						tmpV->sigVehiculo = tmpV->sigVehiculo->sigVehiculo;
-						delete(aux);*/	
+					if(tmpV->sigVehiculo!=NULL){
+						eliminarTodasLasMultasDeUnVehiculos(tmpV);
+						struct vehiculo *aux = tmpV->sigVehiculo;
+						tmpV->sigVehiculo = aux->sigVehiculo;
+						delete(aux);	
 					}
 				}
 			}
@@ -317,16 +341,6 @@ void eliminarVehiculosPorNroDePlaca(struct personas **p, char placa[8]){
 	}
 }
 
-void eliminarVehiculos(struct vehiculo *v){
-	if(v){
-		while(v){
-			struct vehiculo *tmp = new vehiculo;
-			tmp = v;
-			v = v->sigVehiculo;
-			delete(tmp);
-		}
-	} 
-}
 
 int contarVehiculo(struct vehiculo *v){
 	int cont = 0;
@@ -348,7 +362,6 @@ void aggInfraccion(struct infraccion **i, int nInfraccion, int fInfraccion, char
 	tmp->montoDeLaMulta = mInfraccion;
 	tmp->pagado = pagado;
 	strcpy(tmp->tipoDeInfraccion, tInfraccion);
-	//tmp->sigInfraccion = NULL;
 	tmp->sigInfraccion = *i;
 	*i = tmp;
 }
@@ -409,62 +422,19 @@ struct infraccion *buscarMultaPorNroDeMulta(struct personas *p, int nroMulta){
 
 void mostrarMultaEncontrada(struct infraccion *i){
 	if(i){
-		printf("Infraccion Nro %i: \n", i->nroInfraccion);
-		printf("Tipo de infraccion: %s\n", i->tipoDeInfraccion);
-		printf("Fecha en la que se ocasiono la infraccion: %i\n", i->fechaDeInfraccion);
-		printf("Monto a pagar: %i\n", i->montoDeLaMulta);
+		printf("\t\tInfraccion Nro %i: \n", i->nroInfraccion);
+		printf("\t\tTipo de infraccion: %s\n", i->tipoDeInfraccion);
+		printf("\t\tFecha en la que se ocasiono la infraccion: %i\n", i->fechaDeInfraccion);
+		printf("\t\tMonto a pagar: %i\n", i->montoDeLaMulta);
 		if(i->pagado == 0){
-			printf("Esta multa no ha sido pagada\n");
+			printf("\t\tEsta multa no ha sido pagada\n");
 		}else{
-			printf("Esta multa ya fue pagada\n");
+			printf("\t\tEsta multa ya fue pagada\n");
 		}
 	}
 }
 
-/*
-void eliminarMulta(struct infraccion **i, int nroMulta){
-	infraccion *tmp = *i;
-	if(tmp){
-		if(tmp->nroInfraccion == nroMulta){
-			*i = (*i)->sigInfraccion;
-			delete(tmp);
-		}else{
-			while((tmp->sigInfraccion)&&(tmp->sigInfraccion->nroInfraccion!=nroMulta)){
-				tmp = tmp->sigInfraccion;
-			}
-			if(tmp->sigInfraccion){
-				infraccion *aux = tmp->sigInfraccion;
-				tmp->sigInfraccion = tmp->sigInfraccion->sigInfraccion;
-				delete(aux);
-			}
-		}
-	}
-}
 
-void eliminarMultaPorNroInfraccion(struct personas **p, int nroMulta){
-	struct personas *tmp = *p;
-	struct vehiculo *tmpV = NULL;
-	struct infraccion *tmpI = NULL;
-	if(tmp){
-		for(; tmp; tmp = tmp->sigPersona){
-			tmpV = tmp->misVehiculos;
-			if(tmpV){
-				for(;tmpV; tmpV = tmpV->sigVehiculo){
-					tmpI = tmpV->misInfracciones;
-					if(tmpI){
-						if(tmpI->nroInfraccion == nroMulta){
-							eliminarMulta(&tmpI, nroMulta);
-							return;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-*/
-
-/*
 void eliminarMultaPorNroDeMulta(struct personas **p, int nroMulta){
 	struct vehiculo *tmpV = NULL;
 	struct infraccion *tmpI = NULL;
@@ -476,18 +446,15 @@ void eliminarMultaPorNroDeMulta(struct personas **p, int nroMulta){
 				tmpI = tmpV->misInfracciones;
 				if(tmpI){
 					if(tmpI->nroInfraccion == nroMulta){
-						infraccion *aux = NULL;
-						aux = &(*tmpI);
-						tmpI = tmpI->sigInfraccion;
-						delete(aux);
+						tmpV->misInfracciones = tmpV->misInfracciones->sigInfraccion;
+						delete(tmpI);
 					}else{
-						while((tmpI->sigInfraccion)&&(tmpI->sigInfraccion->nroInfraccion!=nroMulta)){
+						while((tmpI->sigInfraccion!=NULL)&&(tmpI->sigInfraccion->nroInfraccion!=nroMulta)){
 							tmpI = tmpI->sigInfraccion;
 						}
-						if(tmpI->sigInfraccion){
-							infraccion *aux = new infraccion;
-							aux = tmpI->sigInfraccion;
-							tmpI->sigInfraccion = tmpI->sigInfraccion->sigInfraccion;
+						if(tmpI->sigInfraccion != NULL){
+							struct infraccion *aux = tmpI->sigInfraccion;
+							tmpI->sigInfraccion = aux->sigInfraccion;
 							delete(aux);	
 						}
 					}
@@ -495,17 +462,23 @@ void eliminarMultaPorNroDeMulta(struct personas **p, int nroMulta){
 			}
 		}
 	}
-}*/
+}
 
-void eliminarTodasLasMultasDeUnVehiculos(struct infraccion *i){
-	if(i){
-		while(i){
-			struct infraccion *tmp = new infraccion;
-			tmp = i;
-			i = i->sigInfraccion;
-			delete(tmp);
+void pagarMultas(infraccion *i){
+	int opcion = -1;
+	printf("\n\t El monto de la multa es: %i", i->montoDeLaMulta);
+	printf("\n\t ¿Desea cancelar la multa? (1-Si/0-No)");
+	scanf("%i", &opcion);
+	switch(opcion){
+		case 1: {
+			printf("\n\t La multa nro %i, ha sido cancelada", i->nroInfraccion);
+			i->pagado = 1;
+			system("pause");
+			system("cls");
+			break;
 		}
-	} 
+		case 2: break;
+	}
 }
 
 int contarMultas(struct infraccion *i){
@@ -516,6 +489,107 @@ int contarMultas(struct infraccion *i){
 	}
 	return count;
 }
+
+
+/*//////////////////////////////////////////////////////////////////////////////////////////
+                     FUNCIONES PARA LAS OPERACIONES DE CONSULTAS
+//////////////////////////////////////////////////////////////////////////////////////////*/
+
+
+void mostrarDatosCompletosDelTitular(struct personas *p, int cedula){
+	struct personas *tmp = buscarPersona(p,cedula);
+	vehiculo *tmpV = NULL;
+	infraccion *tmpI = NULL;
+	if(tmp){
+		printf("Nombre: %s\n", tmp->nombre);
+		printf("Cedula: %i\n", tmp->cedula);
+		printf("Direccion: %s\n", tmp->direccion);
+		printf("Fecha de Nacimiento: %i\n", tmp->fechaDeNacimiento);
+		printf("Edad: %i\n", p->edad);
+		tmpV = tmp->misVehiculos;
+		if(tmpV!=NULL){
+			while(tmpV){
+				mostrarVehiculoEncontrado(tmpV);
+				tmpI = tmpV->misInfracciones;
+				printf("Este vehiculo posee %i multas\n", contarMultas(tmpI));
+				printf("----------------------------------\n");
+				printf("\n");
+				tmpV = tmpV->sigVehiculo;
+			}
+		}	
+	}
+}
+
+
+void mostrarDatosDelTitularMasInformacionDeVehiculosYMultas(struct personas *p, int cedula){
+	struct personas *tmp = buscarPersona(p,cedula);
+	vehiculo *tmpV = NULL;
+	infraccion *tmpI = NULL;
+	if(tmp){
+		printf("Nombre: %s\n", tmp->nombre);
+		printf("Cedula: %i\n", tmp->cedula);
+		printf("Direccion: %s\n", tmp->direccion);
+		printf("Fecha de Nacimiento: %i\n", tmp->fechaDeNacimiento);
+		printf("Edad: %i\n", p->edad);
+		tmpV = tmp->misVehiculos;
+		if(tmpV!=NULL){
+			while(tmpV){
+				mostrarVehiculoEncontrado(tmpV);
+				tmpI = tmpV->misInfracciones;
+				if(tmpI!=NULL){
+					while(tmpI){
+						mostrarMultaEncontrada(tmpI);
+						printf("----------------------------------\n");
+						printf("\n");
+						tmpI = tmpI->sigInfraccion;
+					}
+				}
+				tmpV = tmpV->sigVehiculo;
+			}
+		}
+	}
+}
+
+int compararPlacasOrdenAlfabetico(char placa1[8], char placa2[8]){
+	int letraPlaca1 = 0;
+	int letraPlaca2 = 0;
+	int i = 0;
+	const int maxLen = 6;
+	while((letraPlaca1 == letraPlaca2)&&(i<=maxLen)){
+		letraPlaca1 = placa1[i];
+		letraPlaca2 = placa2[i];
+		i++;
+	}
+	if(letraPlaca1<letraPlaca2){
+		printf("%s va primero que %s\n", placa1, placa2);
+		return 1;
+	}else if(letraPlaca1>letraPlaca2){
+		printf("%s va primero que %s\n", placa2, placa1);
+		return 0;
+	}else{
+		printf("son iguales\n");
+	}
+}
+
+void swap( vehiculo *x, vehiculo *y){ /* Intercambia los contenidos de las direcciones x , y */
+	vehiculo c= *x;
+	*x=*y;
+	*y=c;
+};
+
+void ordenarPlacasOrdenAlfabetico(vehiculo *v){
+	int menor = 0;
+	vehiculo *tmp = v;
+	if(tmp){
+		while(tmp){
+			printf("direccion de la placa %s: %i \n",tmp->placa, &tmp);
+			system("pause");
+			tmp = tmp->sigVehiculo;
+		}
+	}
+}
+
+
 /*//////////////////////////////////////////////////////////////////////////////////////////
                      FUNCIONES PARA LOS GUARDAR Y CARGAR DATOS 
 //////////////////////////////////////////////////////////////////////////////////////////*/
@@ -745,7 +819,12 @@ int main(){
 													break;
 												}
 												case 4:{
-													//eliminarVehiculosPorNroDePlaca(&p, "AAA111");
+													system("cls");
+													char placaV[8];
+													printf("Introduce la placa del vehiculo que desea buscar: ");
+													fflush(stdin);
+													gets(placaV);
+													eliminarVehiculosPorNroDePlaca(&p, placaV);
 													break;
 												}
 											}
@@ -785,7 +864,14 @@ int main(){
 											switch(z){
 												case 1: insertarInfraccion(&p); 
 												break;
-												case 2: break;//Falta la funcion de Pagar una multa
+												case 2:{
+													int nroMulta = 0;
+													printf("Inserte el Nro de infraccion que desea buscar en el sistema: ");
+													scanf("%i", &nroMulta);
+													system("cls");
+													pagarMultas(buscarMultaPorNroDeMulta(p, nroMulta));
+													break;
+												}
 												case 3:{
 													int nroMulta = 0;
 													printf("Inserte el Nro de infraccion que desea buscar en el sistema: ");
@@ -799,7 +885,8 @@ int main(){
 													int nroMulta = 0;
 													printf("Inserte en nro de infraccion que desee eliminar del sistema: ");
 													scanf("%i", &nroMulta);
-													//eliminarMultaPorNroInfraccion(&p, nroMulta);
+													eliminarMultaPorNroDeMulta(&p, nroMulta);
+													printf("La multa de nro: %i, ha sido eliminada de nuestros registros\n", nroMulta);
 													break;
 												} 
 											}
@@ -821,20 +908,42 @@ int main(){
 											switch(z){
 												case 1:break;//Falta hacer la funcion
 												case 2:{
-													system("cls");
 													int w = -1;
 													while(w!=0){
+														system("cls");
 														printf("\n\t1. Mostrar datos completos del titular(Informacion personal, datos de sus vehiculos y total de multas asociada a la persona)");
 														printf("\n\t2. Mostrar datos del titular y la informacion de cada uno de sus vehiculos con sus respectivas multas");
 														printf("\n\t3. Mostrar las multas no pagadas de todos sus vehiculos de manera ordenada por placa, y el monto total a pagar");//Ordenada por numero de placa de manera ascendente
 														printf("\n\t4. Mostrar todas las multas asociadas a una placa");//Ordenar de manera ascendente las no paagdas primero y luego las pagadas
-														printf("\n\t5. Mostrar todas las multas que posee el titular, asociadas a un tipo de infraccion");
+														printf("\n\t5. Mostrar todas las multas que posee el titular, asociadas a un tipo de infraccion\n");
 														scanf("%i", &w);
 														if(w>=0&&w<=5){
 															switch(w){
-																case 1: break;
-																case 2: break;
-																case 3: break;
+																case 1: {
+																	int cedula = 0;
+																	printf("Ingrese el nro de cedula del titular que quiere buscar en el sistema: ");
+																	scanf("%i", &cedula);
+																	mostrarDatosCompletosDelTitular(p, cedula);
+																	//fflush(stdin);
+																	system("pause");
+																	break;
+																}
+																case 2:{
+																	int cedula = 0;
+																	printf("Ingrese el nro de cedula del titular que quiere buscar en el sistema: ");
+																	scanf("%i", &cedula);
+																	mostrarDatosDelTitularMasInformacionDeVehiculosYMultas(p,cedula);
+																	//fflush(stdin);
+																	system("pause");
+																	break;
+																} 
+																case 3:{
+																	struct personas *tmp = NULL;
+																	tmp = buscarPersona(p, 26327898); 
+																	ordenarPlacasOrdenAlfabetico(tmp->misVehiculos);
+																	system("pause");
+																	break;
+																}
 																case 4: break;
 																case 5: break;
 															}
