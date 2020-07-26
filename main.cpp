@@ -231,7 +231,7 @@ struct vehiculo *buscarVehiculoPlaca(struct personas *p, char placa[8]){
 		for(;v; v = v->sigVehiculo){
 			if(strcmp(v->placa, placa) == 0){
 				encontrado = 1;
-				printf("El vehiculo pertenece al propietario del numero de cedula %i\n", p->cedula);
+				//printf("El vehiculo pertenece al propietario del numero de cedula %i\n", p->cedula);
 				return v;
 			}
 		}
@@ -561,30 +561,52 @@ int compararPlacasOrdenAlfabetico(char placa1[8], char placa2[8]){
 		i++;
 	}
 	if(letraPlaca1<letraPlaca2){
-		printf("%s va primero que %s\n", placa1, placa2);
+		//printf("%s va primero que %s\n", placa1, placa2);
 		return 1;
 	}else if(letraPlaca1>letraPlaca2){
-		printf("%s va primero que %s\n", placa2, placa1);
+		//printf("%s va primero que %s\n", placa2, placa1);
 		return 0;
 	}else{
-		printf("son iguales\n");
+		//printf("son iguales\n");
 	}
 }
 
-void swap( vehiculo *x, vehiculo *y){ /* Intercambia los contenidos de las direcciones x , y */
-	vehiculo c= *x;
-	*x=*y;
-	*y=c;
+void swapPlacas( char placa1[8], char placa2[8]){ /* Intercambia los contenidos de las direcciones x , y */
+	char aux[8];
+	strcpy(aux, placa1);
+	strcpy(placa1, placa2);
+	strcpy(placa2,aux);
 };
 
-void ordenarPlacasOrdenAlfabetico(vehiculo *v){
-	int menor = 0;
-	vehiculo *tmp = v;
-	if(tmp){
-		while(tmp){
-			printf("direccion de la placa %s: %i \n",tmp->placa, &tmp);
-			system("pause");
-			tmp = tmp->sigVehiculo;
+void ordenarPlacasOrdenAlfabetico(personas *p){
+	personas *auxP = p;
+	int k = 0;
+	int mayor = 0;
+	vehiculo *aux = p->misVehiculos;
+	char arrayString[20][8];
+	for(;aux; aux = aux->sigVehiculo, k++){
+		strcpy(arrayString[k], aux->placa);
+	}
+	for(int i = 0; i<k; i++){
+		for(int j = i+1; j<k; j++){
+			mayor = compararPlacasOrdenAlfabetico(arrayString[i], arrayString[j]);
+			if(mayor == 0){
+				swapPlacas(arrayString[i], arrayString[j]);
+			}
+		}
+	}
+	vehiculo *tmp = NULL;
+	printf("\n\t Informacion de las multas no pagadas de los vehiculos:\n\n");
+	for(int l = 0; l<k; l++){
+		tmp = buscarVehiculoPlaca(auxP, arrayString[l]);
+		infraccion *infracciones = tmp->misInfracciones;
+		while(infracciones){
+			if(infracciones->pagado == 0){
+				printf("\n\n Placa: %s \n",tmp->placa);
+				mostrarMultaEncontrada(infracciones);
+				printf("---------------------------------------------------------------------\n");
+			}
+			infracciones = infracciones->sigInfraccion;	
 		}
 	}
 }
@@ -913,7 +935,7 @@ int main(){
 														system("cls");
 														printf("\n\t1. Mostrar datos completos del titular(Informacion personal, datos de sus vehiculos y total de multas asociada a la persona)");
 														printf("\n\t2. Mostrar datos del titular y la informacion de cada uno de sus vehiculos con sus respectivas multas");
-														printf("\n\t3. Mostrar las multas no pagadas de todos sus vehiculos de manera ordenada por placa, y el monto total a pagar");//Ordenada por numero de placa de manera ascendente
+														printf("\n\t3. Mostrar las multas no pagadas de todos sus vehiculos de manera ordenada por placa, y el monto total a pagar");
 														printf("\n\t4. Mostrar todas las multas asociadas a una placa");//Ordenar de manera ascendente las no paagdas primero y luego las pagadas
 														printf("\n\t5. Mostrar todas las multas que posee el titular, asociadas a un tipo de infraccion\n");
 														scanf("%i", &w);
@@ -924,7 +946,6 @@ int main(){
 																	printf("Ingrese el nro de cedula del titular que quiere buscar en el sistema: ");
 																	scanf("%i", &cedula);
 																	mostrarDatosCompletosDelTitular(p, cedula);
-																	//fflush(stdin);
 																	system("pause");
 																	break;
 																}
@@ -933,14 +954,14 @@ int main(){
 																	printf("Ingrese el nro de cedula del titular que quiere buscar en el sistema: ");
 																	scanf("%i", &cedula);
 																	mostrarDatosDelTitularMasInformacionDeVehiculosYMultas(p,cedula);
-																	//fflush(stdin);
 																	system("pause");
 																	break;
 																} 
-																case 3:{
-																	struct personas *tmp = NULL;
-																	tmp = buscarPersona(p, 26327898); 
-																	ordenarPlacasOrdenAlfabetico(tmp->misVehiculos);
+																case 3:{ 
+																int cedula = 0;
+																	printf("Ingrese el nro de cedula de la persona de la cual quieres saber informacion de sus multas no pagadas: ");
+																	scanf("%i", &cedula);
+																	ordenarPlacasOrdenAlfabetico(buscarPersona(p, cedula));
 																	system("pause");
 																	break;
 																}
