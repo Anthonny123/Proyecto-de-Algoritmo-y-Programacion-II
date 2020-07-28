@@ -54,7 +54,10 @@ void aggPersona(struct personas **p, int c, char n[20], int dn, int mn, int yn, 
 	*p = tmp;
 }
 
+struct personas *buscarPersona(struct personas *p, int cedula);
+
 void insertarPersona(struct personas **p){
+	struct personas *tmp = NULL;
 	int dia = 0;
 	int mes = 0;
 	int year = 0;
@@ -68,8 +71,14 @@ void insertarPersona(struct personas **p){
 	fflush(stdin);
 	printf("Indique el numero de cedula de la persona: "); scanf("%i", &cedula);
 	printf("\n");
+	tmp = buscarPersona(*p, cedula);
+	if(tmp){
+		printf("Ingrese un nro de cedula que no este asociada a una persona dentro de nuestro sistema\n");
+		system("pause");
+		return;
+	}
 	fflush(stdin);
-	printf("Indique la fecha de nacimiento (dd/mm/yyyy): "); scanf("%i", &dia);printf("/");scanf("%i", &mes);printf("/");scanf("%i", &year);
+	printf("Indique la fecha de nacimiento (d/m/yyyy): ");printf("\nDia(Si va del 1 al 9, ingrese el dato sin el 0 del inicio): "); scanf("%i", &dia);printf("\nMes(Si va del 1 al 9, ingrese el dato sin el 0 del inicio): ");scanf("%i", &mes);printf("\nAnnio");scanf("%i", &year);
 	printf("\n");
 	fflush(stdin);
 	printf("Indique la direccion de la persona: "); gets(direccion);
@@ -259,6 +268,7 @@ void mostrarVehiculoEncontrado(struct vehiculo *v){
 		printf("\n\tPlaca: %s", v->placa);
 		printf("\n\tMarca: %s", v->marca);
 		printf("\n\tModelo: %s", v->modelo);
+		printf("\n\tAnnio: %i", v->year);
 		printf("\n\tColor: %s\n", v->color);
 		//printf("----------------------------------\n");	
 	}
@@ -276,7 +286,19 @@ void insertarVehiculo(struct vehiculo **v, struct personas **p){
 	struct personas *tmp = buscarPersona(*p, cedula);
 	fflush(stdin);
 	if(tmp!=NULL){
-		printf("Indique la Placa del vehiculo: "); gets(placa);
+		printf("Indique la Placa del vehiculo(La matricula debe de tener hasta 6 caracteres): "); gets(placa);
+		if(strlen(placa)>6){
+			printf("Esta placa tiene una longitud distinta a la aceptada\n");
+			system("pause");
+			return;
+		}else{
+			struct vehiculo *tmpV = buscarVehiculoPlaca(*p, placa);
+			if(tmpV){
+				printf("Debe ingresar una placa que no este en nuestro sistema\n");
+				system("pause");
+				return;
+			}
+		}
 		printf("\n");
 		fflush(stdin);
 		printf("Indique la Marca del vehiculo: "); gets(marca);
@@ -292,6 +314,10 @@ void insertarVehiculo(struct vehiculo **v, struct personas **p){
 		printf("\n");
 		fflush(stdin);
 		aggVehiculo(&tmp->misVehiculos, year, placa, marca, modelo, color);
+	}else{
+		printf("Esta persona no ha sido encontrado en nuestro sistema\n");
+		system("pause");
+		return;
 	}
 }
 
@@ -760,6 +786,10 @@ void mostrarMultasOrdenadasPrimeroPagasYLuegoNoPagas(personas *p, char placa[8])
 	int nroMultas = contarMultas(aux);
 	int arr[nroMultas-1];
 	infraccion *tmp = v->misInfracciones;
+	if(!tmp){
+		printf("Esta placa no tiene informacion de multas.\n");
+		return;
+	}
 	for(; tmp; tmp = tmp->sigInfraccion, i++){
 		arr[i] = transformarFecha(tmp->diaInfraccion, tmp->mesInfraccion, tmp->yearInfraccion);
 	}
@@ -844,6 +874,11 @@ void mostrarMultasDeUnaPersonaPorVehiculo(struct personas *p, int cedula, char t
 
 void mostrarMultaPorNroDeMultaOrdenada(struct personas *p, char placa[8]){
 	vehiculo *v = buscarVehiculoPlaca(p, placa);
+	if(!v){
+		printf("No se ha encontrado el vehiculo\n");
+		system("pause");
+		return;
+	}
 	infraccion *tmp = v->misInfracciones;
 	if(tmp){
 		int arr[20];
@@ -1260,7 +1295,14 @@ int main(){
 													system("pause");
 													break;
 												}
-												case 4:break;//Falta hacer la funcion
+												case 4:{///Falta la funcion
+													char placaV[8];
+													fflush(stdin);
+													printf("Ingrese placa: "); gets(placaV);
+													printf("%i", strlen(placaV));
+													system("pause");
+													break;
+												}
 											}
 										}
 									}
