@@ -64,6 +64,8 @@ void aggPersona(struct personas **p, int c, char n[20], char ap[20], int dn, int
 }
 
 struct personas *buscarPersona(struct personas *p, int cedula);
+int contarVehiculo(struct vehiculo *v);
+int contarMultas(struct infraccion *i);
 
 void insertarPersona(struct personas **p){
 	struct personas *tmp = NULL;
@@ -166,8 +168,14 @@ void eliminarPersonas(struct personas **p, int cedula){
 	struct personas *tmp = *p;
 	if(tmp){
 		if(tmp->cedula == cedula){
-			eliminarTodasLasMultasDeUnVehiculos((*p)->misVehiculos);
-			eliminarVehiculosDelasPersonas(*p);
+			int nroVehiculos = contarVehiculo(tmp->misVehiculos);
+			if(nroVehiculos>0){
+				int nroMultas = contarMultas(tmp->misVehiculos->misInfracciones);
+				if(nroMultas>0){
+					eliminarTodasLasMultasDeUnVehiculos((*p)->misVehiculos);
+				}
+				eliminarVehiculosDelasPersonas(*p);
+			}
 			*p = (*p)->sigPersona;
 			delete(tmp);
 		}else{
@@ -176,8 +184,14 @@ void eliminarPersonas(struct personas **p, int cedula){
 			}
 			if(tmp->sigPersona){
 				struct personas *aux = tmp->sigPersona;
-				eliminarVehiculosDelasPersonas(aux);
-				eliminarTodasLasMultasDeUnVehiculos(aux->misVehiculos);
+				int nroVehiculos = contarVehiculo(tmp->misVehiculos);
+				if(nroVehiculos>0){
+					int nroMultas = contarMultas(tmp->misVehiculos->misInfracciones);
+					if(nroMultas>0){
+						eliminarTodasLasMultasDeUnVehiculos(aux->misVehiculos);
+					}
+					eliminarVehiculosDelasPersonas(aux);
+				}
 				tmp->sigPersona = tmp->sigPersona->sigPersona;
 				delete(aux);
 			}
