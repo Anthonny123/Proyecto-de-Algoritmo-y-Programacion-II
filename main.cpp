@@ -94,7 +94,7 @@ void insertarPersona(struct personas **p){
 		return;
 	}
 	fflush(stdin);
-	printf("Indique la fecha de nacimiento (d/m/yyyy): ");printf("\nDIA (Ingrese el dato sin el 0 del inicio): "); scanf("%i", &dia);printf("\nMES (Ingrese el dato sin el 0 del inicio): ");scanf("%i", &mes);printf("\nAnnio: ");scanf("%i", &year);
+	printf("Indique la fecha de nacimiento (d/m/yyyy): ");printf("\nIngrese el DIA (Ingrese el dato sin el 0 del inicio): "); scanf("%i", &dia);printf("\nIngrese el MES (Ingrese el dato sin el 0 del inicio): ");scanf("%i", &mes);printf("\nIngrese el Annio: ");scanf("%i", &year);
 	printf("\n");
 	fflush(stdin);
 	printf("Indique la direccion de la persona: "); gets(direccion);
@@ -1274,6 +1274,7 @@ int main(){
 	while(x!=0){
 		int n;
 		system("cls");
+		printf("\n\t ****Menu principal***\n ");
 		printf("\n\t1. Mantenimiento");
 		printf("\n\t2. Operaciones y Consultas");
 		printf("\n\t0. Salir\n");
@@ -1286,9 +1287,11 @@ int main(){
 					int y = -1;
 					while(y!=0){
 						system("cls");
+						printf("\n\t ****Mantenimiento***\n ");
 						printf("\n\t1. Personas");
 						printf("\n\t2. Vehiculos");
 						printf("\n\t0. Volver al menu anterior\n");
+						printf("\n\t Ingrese una opcion (0..2):");
 						scanf("%i", &y);
 						if(y>=0 && y<=2){
 							switch(y){
@@ -1299,11 +1302,13 @@ int main(){
 									int z = -1;
 									while(z!=0){
 										system("cls");
+										printf("\n\t ****Menu personas***\n ");
 										printf("\n\t1. Agregar a una persona al sistema");
 										printf("\n\t2. Modificar a una persona en el sistema");
 										printf("\n\t3. Consultar informacion de una persona en el sistema");
 										printf("\n\t4. Eliminar a una persona del sistema");
 										printf("\n\t0. Volver al menu anterior\n");
+										printf("\n\t Ingrese una opcion (0..4):");
 										scanf("%i", &z);
 										if(z>=0&&z<=4){
 											switch(z){
@@ -1346,11 +1351,13 @@ int main(){
 									int z = -1;
 									while(z!=0){
 										system("cls");
+										printf("\n\t ****Menu vehiculos***\n ");
 										printf("\n\t1. Agregar un vehiculo al sistema");
 										printf("\n\t2. Modificar los datos de un vehiculo");
 										printf("\n\t3. Consultar los datos de un vehiculo en el sistema");
 										printf("\n\t4. Eliminar a un vehiculo del sistema");
 										printf("\n\t0. Volver al menu anterior\n");
+										printf("\n\t Ingrese una opcion (0..4):");
 										scanf("%i", &z);	
 										if(z>=0&&z<=4){
 											switch(z){
@@ -1401,9 +1408,11 @@ int main(){
 					int y = -1;
 					while(y!=0){
 						system("cls");
+						printf("\n\t ****Operaciones y consultas***\n ");
 						printf("\n\t1. Operaciones con Multas");
 						printf("\n\t2. Consultas");
 						printf("\n\t0. Volver al menu anterior\n");
+						printf("\n\t Ingrese una opcion (0..2):");
 						scanf("%i", &y);
 						if(y>=0 && y<=2){
 							switch(y){
@@ -1414,11 +1423,13 @@ int main(){
 									int z = -1;
 									while(z!=0){
 										system("cls");
+										printf("\n\t ****Menu Multas***\n ");
 										printf("\n\t1. Agregar una multa al sistema");
 										printf("\n\t2. Pagar una Multa asociada a un Vehiculo");
 										printf("\n\t3. Consultar informacion de las multas asociada a un vehiculo");
 										printf("\n\t4. Eliminar a una multa del sistema");
 										printf("\n\t0. Volver al menu anterior\n");
+										printf("\n\t Ingrese una opcion (0..4):");
 										scanf("%i", &z);
 										if(z>=0&&z<=4){
 											switch(z){
@@ -1459,11 +1470,13 @@ int main(){
 									int z = -1;
 									while(z!=0){
 										system("cls");
+										printf("\n\t ****Menu consultas***\n");
 										printf("\n\t1. Ingresar nombre o sinonimos de un nombre para buscar su informacion en el sistema");
 										printf("\n\t2. Busqueda completa de los datos del titular asociados a su cedula");
 										printf("\n\t3. Busqueda de multas asociada a una placa en el sistema");
 										printf("\n\t4. Operaciones dado un tipo de infraccion y dos a;os");
 										printf("\n\t0. Volver al menu anterior\n");
+										printf("\n\t Ingrese una opcion (0..4):");
 										scanf("%i", &z);	
 										if(z>=0&&z<=4){
 											switch(z){
