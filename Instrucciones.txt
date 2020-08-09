@@ -1,0 +1,81 @@
+////////////////////////////////////////////////////////
+Este proyecto fue hecho por los estudiantes: 
+-Baladi Anthonny
+-Cadiz Yoikerth
+-Leon Felix
+-Ugeto Veronica
+////////////////////////////////////////////////////////
+
+
+¿Como funciona el programa?
+
+- El programa primero carga el archivo "Registro.txt" este archivo tiene que estar en la misma carpeta donde se encuentra el ejecutable para que pueda leerlo, si este archivo se encuentra en otra direccion, cada vez que abra el programa el programa lo tomara como si no hubiera un registro previo y no cargaran las modificaciones realizadas con anterioridad
+
+- Cuando inicie el programa, si es la primera vez, debera introducir una persona al registro ya que si no lo hace no podra proseguir con las siguientes funciones que este posee
+
+Nota: Al ingresar las fechas tanto en las personas, como en los vehiculos, como en las multas, debe seguir este formato dd/mm/aa (Sin un 0 al inicio, es decir si por ejemplo quiere insertar el dia uno, se debe insertar de esta manera "1", no de esta "01", o si no ocasionara un problema, al igual pasa con los meses y los años).
+
+- Luego de insertar a las personas puede proseguir a insertar vehiculos, multas y ver la informacion en el amplio catalogo de funciones que posee el programa
+
+- Al momento de acabar sus operaciones y querer salir del programa, la aplicacion guardara los cambios realizados de manera automatica.
+
+¿Como guarda el programa?
+
+El programa tiene un orden especifico de guardar, al igual que al momento de cargar, si esto no sigue el orden entonces el programa no podra correr de una manera optima y ocurriran diversos errores.
+
+1- Escribe en el archivo registros el numero de personas que se encuentran en los datos del proyecto.
+
+2- Luego de escribir el numero de personas dentro del registro, procedera a guardar la informacion de la siguiente manera:
+
+	- Cedula
+	- Nombre
+	- Apellido
+	- Dia/mes/Año de Nacimiento
+	- Direccion
+	- Ciudad
+	- Edad
+
+3- Luego escribira el numero de vehiculos que posee la persona, si esta tiene 0 entonces pasara a escribir los datos de la siguiente persona. Si la persona posee 1 o mas vehiculos guarda la informacion de la siguiente manera:
+
+	- Placa
+	- Marca
+	- Modelo
+	- Color
+	- Año
+
+4- Luego de los vehiculos Escribira el numero de multas de cada vehiculo, si el vehiculo posee 0 multas, escribira 0 en el registro y pasara al siguiente vehiculo. Si el vehiculo posee multas guardara la informacion de la siguiente manera:
+
+	- Numero de Infraccion
+	- Dia/Mes/Año de la Infraccion
+	- Tipo de Infraccion
+	- Monto de la Infraccion
+	- Estatus de la infraccion (si esta esta pagada o no).
+
+¿Como carga los archivos el programa?
+
+Al momento de cargar los archivos los lee en orden par poder introducirlos y crearlos en el proyecto, si estos no estan en orden entonces ocurrira un error y no podra seguir trabajando con la aplicacion.
+
+Para cargar correctamente el orden debe ser el siguiente:
+
+	- Nro de Personas en el Registro
+	- Cedula
+	- Nombre
+	- Apellido
+	- Dia/mes/Año de Nacimiento
+	- Direccion
+	- Ciudad
+	- Edad
+	- Nro de Vehiculos de la persona
+	- Placa
+	- Marca
+	- Modelo
+	- Color
+	- Año
+	- Nro de Multas del Vehiculo
+	- Numero de Infraccion
+	- Dia/Mes/Año de la Infraccion
+	- Tipo de Infraccion
+	- Monto de la Infraccion
+	- Estatus de la infraccion (si esta esta pagada o no).
+
+Nota: Si este tiene mas de un vehiculo se vuelve a guardar desde placa hasta años luego de las infracciones del vehiculo anterior, lo mismo pasa con las multas, si posee mas de una multa el vehiculo se guarda luego de la multa anterior.
