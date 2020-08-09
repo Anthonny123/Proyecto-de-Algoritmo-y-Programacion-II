@@ -1,3 +1,11 @@
+/*///////////////////////////////////////////////////////
+Este proyecto fue hecho por los estudiantes: 
+-Baladi Anthonny
+-Cadiz Yoikerth
+-Leon Felix
+-Ugeto Veronica
+///////////////////////////////////////////////////////*/
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -5,6 +13,11 @@
 struct lista{ //Esta lista nos ayudara en el tema de la organizacion
 	int valor;
 	struct lista *prox;
+};
+
+struct listaPlaca{ //Esta lista nos ayudara en el tema de la organizacion
+	char placaV[8];
+	struct listaPlaca *sig;
 };
 
 struct infraccion{
@@ -869,52 +882,79 @@ void mostrarMultasOrdenadasPrimeroPagasYLuegoNoPagas(personas *p, char placa[8])
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+void insertarElementoConPlaca(listaPlaca **p, char x[8]){
+	struct listaPlaca *tmp = new struct listaPlaca;
+	strcpy(tmp->placaV, x);
+	tmp->sig = *p;
+	*p = tmp;
+}
 
-void mostrarMultasDeUnaPersonaPorVehiculo(struct personas *p, int cedula, char tipoDeInfraccion[50]){
-	struct personas *tmp = p;
-	struct infraccion *aux = NULL;
-	tmp = buscarPersona(p, cedula);
-	struct vehiculo *v = tmp->misVehiculos;
-	int nroMulta = 0;
-	for(;v; v= v->sigVehiculo){
-		nroMulta = contarMultas(v->misInfracciones);
-		struct infraccion *tmpI = v->misInfracciones;
-		if(tmpI){
-			int arr[20];
-			int i = 0;
-			for(;tmpI; tmpI = tmpI->sigInfraccion){
-				if(strcmp(tipoDeInfraccion, tmpI->tipoDeInfraccion) == 0){
-					arr[i] = transformarFecha(tmpI->diaInfraccion, tmpI->mesInfraccion, tmpI->yearInfraccion);
-					printf("%i", arr[i]);
-					system("pause");
-					i++;
-				}
-			}
-			if(i>0){
-				simpleSort(arr, i);
-				printf("\n\t Multas vehiculo asociado a la placa: %s \n", v->placa);
-				printf("%i\n", i);
-				int j = 0;
-				for(j; j<i; j++){
-					int dia = devolverAFecha(arr[j],1);
-					int mes = devolverAFecha(arr[j],2);
-					int year = devolverAFecha(arr[j],3);
-					aux = buscarMultaPorFechaDeMulta(p, dia, mes, year);
-					mostrarMultaEncontrada(aux);
-					printf("---------------------------------------------------------------------------------\n");
-				}
-			}else{
-				printf("\n\t El vehiculo con plava %s no tiene multas de ese tipo\n", v->placa);
+struct listaPlaca *vehiculosConLasInfracciones(struct personas *p, int cedula, char tipoDeInfraccion[50]){
+	listaPlaca *listaQueOrdena = NULL;
+	personas *tmp = p;
+	vehiculo *tmpV = NULL;
+	infraccion *tmpI = NULL;
+	if(tmp){
+		for(;tmp; tmp = tmp->sigPersona){
+			if(tmp->cedula == cedula){
+				tmpV = tmp->misVehiculos;
+				if(tmpV){
+					for(;tmpV; tmpV = tmpV->sigVehiculo){
+						tmpI = tmpV->misInfracciones;
+						if(tmpI){
+							for(;tmpI; tmpI = tmpI->sigInfraccion){
+								if(strcmp(tmpI->tipoDeInfraccion, tipoDeInfraccion) == 0){
+									insertarElementoConPlaca(&listaQueOrdena, tmpV->placa);
+									break;
+								}
+							}	
+						}
+					}
+				}	
 			}
 		}
+		return listaQueOrdena;
 	}
 }
+
+void mostrarMultasDeUnaPersonaPorVehiculo2(struct personas *p, int cedula, char tipoDeInfraccion[50]){
+	struct personas *tmp = p;
+	listaPlaca *listaConLasPlacas = vehiculosConLasInfracciones(tmp, cedula, tipoDeInfraccion);
+	vehiculo *tmpV = NULL;
+	infraccion *tmpI = NULL;
+	if(listaConLasPlacas){
+		while(listaConLasPlacas){
+			tmpV = buscarVehiculoPlaca(tmp, listaConLasPlacas->placaV);
+			printf("\n--------------------------------------------------");
+			printf("\nVehiculo: %s", tmpV->placa);
+			printf("\nMarca: %s", tmpV->marca);
+			printf("\nAnnio: %i", tmpV->year);
+			printf("\n");
+			tmpI = tmpV->misInfracciones;
+			for(;tmpI; tmpI = tmpI->sigInfraccion){
+				if(strcmp(tmpI->tipoDeInfraccion, tipoDeInfraccion) == 0){
+					printf("\n\tTipo De Infraccion: %s", tmpI->tipoDeInfraccion);
+					printf("\n\tMonto de la Infraccion: %i", tmpI->montoDeLaMulta);
+					printf("\n\tFecha de la infraccion: %i/%i/%i", tmpI->diaInfraccion, tmpI->mesInfraccion, tmpI->yearInfraccion);
+					printf("\n\tPagado: %i", tmpI->pagado);
+					printf("\n");
+					printf("\n");
+				}
+			}
+			listaConLasPlacas = listaConLasPlacas->sig;
+		}
+	}else{
+		printf("Ninguno de los vehiculos posee multas de este tipo\n");
+	}
+}
+
 /*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
 
 void mostrarMultaPorNroDeMultaOrdenada(struct personas *p, char placa[8]){
 	vehiculo *v = buscarVehiculoPlaca(p, placa);
@@ -1525,7 +1565,34 @@ int main(){
 																	break;
 																}
 																case 5:{
-																	mostrarMultasDeUnaPersonaPorVehiculo(p, 26327898, "Mal estacionado");
+																	char tDInfraccion[50];
+																	int cedula = 0;
+																	int m = -1;
+																	printf("Ingrese el nro de cedula de la persona de la cual quieres saber informacion: \n");
+																	scanf("%i", &cedula);
+																	printf("Ahora indiquenos el tipo de infraccion: (0..5)\n");
+																	printf("\n\t 1- Paso luz roja");
+																	printf("\n\t 2- Mal estacionado");
+																	printf("\n\t 3- Exceso de velocidad");
+																	printf("\n\t 4- Sin luz trasera");
+																	printf("\n\t 5- Paso un alto");
+																	printf("\n");
+																	scanf("%i", &m);
+																	if(m>0&&m<=5){
+																		switch(m){
+																			case 1: strcpy(tDInfraccion, "Paso luz roja");
+																			break;
+																			case 2: strcpy(tDInfraccion, "Mal estacionado");
+																			break;
+																			case 3: strcpy(tDInfraccion, "Exceso de velocidad");
+																			break;
+																			case 4: strcpy(tDInfraccion, "Sin luz trasera");
+																			break;
+																			case 5: strcpy(tDInfraccion, "Paso un alto");
+																			break;
+																		}	
+																	}
+																	mostrarMultasDeUnaPersonaPorVehiculo2(p, cedula, tDInfraccion);
 																	system("pause");	
 																	break;
 																}
